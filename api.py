@@ -248,9 +248,9 @@ class RequestHandler(BaseHTTPRequestHandler):
 
 # Run the HTTP server
 def run_server():
-    server_address = ('', 8000)
+    server_address = ('', 8080)
     httpd = HTTPServer(server_address, RequestHandler)
-    print('Server running on port 8000')
+    print('Server running on port 8080')
     httpd.serve_forever()
 
 # Start the HTTP server in a separate thread

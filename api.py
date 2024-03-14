@@ -52,7 +52,7 @@ class PostData:
     def generate_command(self):
         command = [
             'python',
-            './sdxl_train_network.py'
+            'sdxl_train_network.py'
         ]
         if self.bucket_no_upscale:
             command.append('--bucket_no_upscale')
@@ -248,9 +248,9 @@ class RequestHandler(BaseHTTPRequestHandler):
 
 # Run the HTTP server
 def run_server():
-    server_address = ('', 8080)
+    server_address = ('', 8000)
     httpd = HTTPServer(server_address, RequestHandler)
-    print('Server running on port 8080')
+    print('Server running on port 8000')
     httpd.serve_forever()
 
 # Start the HTTP server in a separate thread

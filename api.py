@@ -103,7 +103,7 @@ class PostData:
 
     def get_json(self):
         response = json.dumps({
-            'start_time': self.start_time,
+            'start_time': self.start_time.isoformat(),
             'bucket_no_upscale' : self.bucket_no_upscale,
             'bucket_reso_steps' : self.bucket_reso_steps,
             'cache_latents' : self.cache_latents,

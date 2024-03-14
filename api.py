@@ -63,7 +63,8 @@ class PostData:
             command.append('--cache_latents_to_disk')
         if self.enable_bucket:
             command.append('--enable_bucket')
-        command.extend(['--min_bucket_reso'.format(self.min_bucket_reso),
+        command.extend([
+            '--min_bucket_reso={}'.format(self.min_bucket_reso),
             '--learning_rate={}'.format(self.learning_rate),
             '--logging_dir={}'.format(self.logging_dir),
             '--lr_scheduler={}'.format(self.lr_scheduler),
@@ -233,6 +234,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             unet_lr=json_data.get('unet_lr'),
             xformers=json_data.get('xformers')
         )
+        current_params = params
         command = params.generate_command()
         # Trigger the subprocess execution
         if not subprocess_running:

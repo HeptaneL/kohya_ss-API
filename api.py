@@ -65,6 +65,7 @@ class PostData:
             command.append('--enable_bucket')
         command.extend([
             '--min_bucket_reso={}'.format(self.min_bucket_reso),
+            '--max_bucket_reso={}'.format(self.max_train_steps),
             '--learning_rate={}'.format(self.learning_rate),
             '--logging_dir={}'.format(self.logging_dir),
             '--lr_scheduler={}'.format(self.lr_scheduler),
@@ -229,7 +230,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             save_model_as=json_data.get('save_model_as'),
             save_precision=json_data.get('save_precision'),
             text_encoder_lr=json_data.get('text_encoder_lr'),
-            train_batch_size=json_data.get('train_data_size'),
+            train_batch_size=json_data.get('train_batch_size'),
             train_data_dir=json_data.get('train_data_dir'),
             unet_lr=json_data.get('unet_lr'),
             xformers=json_data.get('xformers')

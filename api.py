@@ -174,6 +174,16 @@ def upload_file_to_s3(file_path, object_name):
         print("Error uploading file:", str(e))
         return "", str(e)
 
+def download_file_from_s3(bucket_name, object_name, file_path):
+    s3 = boto3.client('s3')
+
+    try:
+        s3.download_file(bucket_name, object_name, file_path)
+        print("File downloaded successfully.")
+    except Exception as e:
+        print("Error downloading file:", str(e))
+
+
 # HTTP request handler
 class RequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -214,6 +224,29 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self.send_response(400, err)
                 self.end_headers()
                 self.wfile.write(b'Upload model failed')
+        elif self.path == '/download-model':
+            # Check for valid JSON content
+            content_type = self.headers.get('Content-Type')
+            if content_type != 'application/json':
+                self.send_response(400)
+                self.end_headers()
+                self.wfile.write(b'Invalid content type')
+                return
+
+            # Retrieve and parse the JSON data
+            content_length = int(self.headers.get('Content-Length'))
+            post_data = self.rfile.read(content_length)
+            try:
+                json_data = json.loads(post_data)
+                download_file_from_s3(json_data.get('bucket_name'), json_data.get('object_name'), json_data.get('file_path'))
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(b'download lora')
+            except json.JSONDecodeError:
+                self.send_response(400)
+                self.end_headers()
+                self.wfile.write(b'Invalid JSON data')
+                return
 
         # Check for valid JSON content
         content_type = self.headers.get('Content-Type')

@@ -3,6 +3,8 @@ import subprocess
 import threading
 from datetime import datetime
 import json
+import boto3
+from configparser import ConfigParser
 
 # Global variable to track subprocess execution status
 subprocess_running = False
@@ -151,6 +153,27 @@ def run_subprocess(command):
 
     subprocess_running = False
 
+def upload_file_to_s3(file_path, object_name):
+    # Load the AWS credentials from the configuration file
+    config = ConfigParser()
+    config.read('config.ini')
+    access_key = config.get('aws', 'access_key')
+    secret_key = config.get('aws', 'secret_key')
+    bucket_name = config.get('aws', 'bucket_name')
+    base_url = config.get('aws', 'base_url')
+
+    # Create an S3 client with the provided credentials
+    s3 = boto3.client('s3', aws_access_key_id=access_key, aws_secret_access_key=secret_key)
+
+    try:
+        s3.upload_file(file_path, bucket_name, object_name)
+        url = f"{base_url}/{object_name}"
+        print("File uploaded successfully.")
+        return url, ""
+    except Exception as e:
+        print("Error uploading file:", str(e))
+        return "", str(e)
+
 # HTTP request handler
 class RequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -180,6 +203,17 @@ class RequestHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         global subprocess_running, current_params
+        if self.path == '/model' and current_params is not None:
+            url, err = upload_file_to_s3(current_params.output_dir,current_params.output_name + "." + current_params.save_model_as)
+            if url != "" :
+                self.send_response(200, url)
+                self.end_headers()
+                self.wfile.write(b'Upload model')
+
+            else:
+                self.send_response(400, err)
+                self.end_headers()
+                self.wfile.write(b'Upload model failed')
 
         # Check for valid JSON content
         content_type = self.headers.get('Content-Type')

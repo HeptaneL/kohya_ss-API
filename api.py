@@ -78,6 +78,11 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self.wfile.write(b'Invalid JSON data')
                 return
         elif self.path == '/caption':
+            if subprocess_running == True:
+                self.send_response(400)
+                self.end_headers()
+                self.wfile.write(b'Still running')
+                return
             content_type = self.headers.get('Content-Type')
             if content_type != 'application/json':
                 self.send_response(400)

@@ -202,18 +202,14 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self.wfile.write(b'Params not available')
         else:
             # Return the subprocess status as a response
-            if subprocess_running:
-                self.send_response(200)
-                self.end_headers()
-                self.wfile.write(b'Subprocess is running')
-            else:
-                self.send_response(200)
-                self.end_headers()
-                self.wfile.write(b'Subprocess has completed')
+            response = json.dumps({"running_status": subprocess_running})
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(response.encode())
 
     def do_POST(self):
         global subprocess_running, current_params
-        if self.path == '/model' and current_params is not None:
+        if self.path == '/model' and subprocess_running == False and current_params is not None:
             url, err = upload_file_to_s3(current_params.output_dir,current_params.output_name + "." + current_params.save_model_as)
             if url != "" :
                 self.send_response(200, url)

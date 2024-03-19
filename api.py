@@ -10,7 +10,7 @@ from configparser import ConfigParser
 subprocess_running = False
 current_params = None
 
-class PostData:
+class TrainLora:
     def __init__(self, bucket_no_upscale, bucket_reso_steps, cache_latents, cache_latents_to_disk, enable_bucket,
                  min_bucket_reso, max_bucket_reso, learning_rate, logging_dir, lr_scheduler, lr_scheduler_num_cycles,
                  max_data_loader_n_workers, max_grad_norm, resolution, max_train_steps, mixed_precision, network_alpha,
@@ -141,7 +141,35 @@ class PostData:
         })
         return response
 
+class Caption:
+    def __init__(self,train_data_dir,caption_extension,batch_size,general_threshold,character_threshold,replace_underscores,model,recursive,max_data_loader_n_workers,debug,undesired_tags,frequency_tags,prefix,postfix,onnx,append_tags,force_download,caption_separator) -> None:
+        self.train_data_dir = train_data_dir
+        self.caption_extension = caption_extension
+        self.batch_size = batch_size
+        self.general_threshold = general_threshold
+        self.character_threshold = character_threshold
+        self.replace_underscores = replace_underscores
+        self.model = model
+        self.recursive = recursive
+        self.max_data_loader_n_workers = max_data_loader_n_workers
+        self.debug = debug
+        self.undesired_tags = undesired_tags
+        self.frequency_tags = frequency_tags
+        self.prefix = prefix
+        self.postfix = postfix
+        self.onnx = onnx
+        self.append_tags = append_tags
+        self.force_download = force_download
+        self.caption_separator = caption_separator
 
+    def generate_command(self):
+        command = [
+            'accelerate',
+            'launch',
+            '"./finetune/tag_images_by_wd14_tagger.py"',
+        ]
+
+        return command
 
 # Function to execute the subprocess
 def run_subprocess(command):
@@ -263,8 +291,8 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.wfile.write(b'Invalid JSON data')
             return
 
-        # Create the PostData instance with parsed parameters
-        params = PostData(
+        # Create the TrainLora instance with parsed parameters
+        params = TrainLora(
             bucket_no_upscale=json_data.get('bucket_no_upscale'),
             bucket_reso_steps=json_data.get('bucket_reso_steps'),
             cache_latents=json_data.get('cache_latents'),

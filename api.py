@@ -78,6 +78,48 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self.wfile.write(b'Invalid JSON data')
                 return
         elif self.path == '/caption':
+            content_type = self.headers.get('Content-Type')
+            if content_type != 'application/json':
+                self.send_response(400)
+                self.end_headers()
+                self.wfile.write(b'Invalid content type')
+                return
+
+            # Retrieve and parse the JSON data
+            content_length = int(self.headers.get('Content-Length'))
+            post_data = self.rfile.read(content_length)
+            try:
+                json_data = json.loads(post_data)
+                params = Caption(
+                    train_data_dir=json_data.get('train_data_dir'),
+                    caption_extension=json_data.get('caption_extension'),
+                    batch_size=json_data.get('batch_size'),
+                    general_threshold=json_data.get('general_threshold'),
+                    character_threshold=json_data.get('caption_separator'),
+                    replace_underscores=json_data.get('replace_underscores'),
+                    model=json_data.get('model'),
+                    recursive=json_data.get('recursive'),
+                    max_data_loader_n_workers=json_data.get('max_data_loader_n_workers'),
+                    debug=json_data.get('debug'),
+                    undesired_tags=json_data.get('undesired_tags'),
+                    frequency_tags=json_data.get('frequency_tags'),
+                    prefix=json_data.get('prefix'),
+                    postfix=json_data.get('postfix'),
+                    onnx=json_data.get('onnx'),
+                    append_tags=json_data.get('append_tags'),
+                    force_download=json_data.get('force_download'),
+                    caption_separator=json_data.get('caption_separator')
+                )
+                command = params.generate_command()
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(b'Subprocess started')
+                threading.Thread(target=run_subprocess, args=[command]).start()
+            except json.JSONDecodeError:
+                self.send_response(400)
+                self.end_headers()
+                self.wfile.write(b'Invalid JSON data')
+                return
             pass
 
         # Check for valid JSON content
